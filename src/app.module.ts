@@ -3,6 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { User } from './entities/user.entity';
+import { Resource } from './entities/resource.entity';
+import { Permission } from './entities/permission.entity';
+import { Organization } from './entities/organization.entity';
 
 @Module({
   imports: [
@@ -14,8 +18,8 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [__dirname + '/**/*.entity{.ts}'],
-      synchronize: process.env.NODE_ENV !== 'production',
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: true,
     }),
   ],
   controllers: [AppController],
