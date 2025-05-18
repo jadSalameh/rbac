@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsObject } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateResourceDto {
@@ -8,18 +8,20 @@ export class CreateResourceDto {
     description: 'The ID of the resource provider',
     example: 'provider123',
   })
-  providerId: string;
+  userId: string;
 
-  @IsObject()
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'The ID of the organization that this record belongs to',
+    example: 'provider123',
+  })
+  organizationId: string;
+
   @IsNotEmpty()
   @ApiProperty({
     description: 'The resource data (e.g., patient record details)',
-    type: 'object',
-    additionalProperties: true,
-    example: {
-      patientName: 'John Doe',
-      dateOfBirth: '1990-01-01',
-    },
+    type: 'string',
   })
-  data: Record<string, any>;
+  data: string;
 }
