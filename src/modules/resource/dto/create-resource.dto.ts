@@ -4,7 +4,10 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateResourceDto {
   @IsString()
   @IsNotEmpty()
-  @ApiProperty({ description: 'The ID of the resource provider', example: 'provider123' })
+  @ApiProperty({
+    description: 'The ID of the resource provider',
+    example: 'provider123',
+  })
   providerId: string;
 
   @IsObject()
@@ -12,6 +15,7 @@ export class CreateResourceDto {
   @ApiProperty({
     description: 'The resource data (e.g., patient record details)',
     type: 'object',
+    additionalProperties: true,
     example: {
       patientName: 'John Doe',
       dateOfBirth: '1990-01-01',
