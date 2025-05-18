@@ -22,9 +22,6 @@ export class User {
   @Column({ type: 'enum', enum: Role })
   role: Role;
 
-  @Column({ default: true })
-  isActive: boolean;
-
   @ManyToOne(() => Organization, (organization) => organization.users)
   organization: Organization;
 }
