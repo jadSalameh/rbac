@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -50,11 +52,13 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'User not found.' })
   editRole(
+    @Req() req,
     @Param('id') id: string,
     @Body() updateUserRoleDto: UpdateUserRoleDto,
   ) {
-    console.log('#####################################');
-    console.log(JSON.stringify(updateUserRoleDto));
+    if (req.user.id == id) {
+      throw new ForbiddenException('you cannot change your own role');
+    }
     return this.userService.updateRole(id, updateUserRoleDto.role!);
   }
 
