@@ -11,6 +11,7 @@ import { User } from './modules/entities/user.entity';
 import { Organization } from './modules/entities/organization.entity';
 import { Permission } from './modules/entities/permission.entity';
 import { Resource } from './modules/entities/resource.entity';
+import { JwtAuthModule } from './auth/jwt/jwt.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { Resource } from './modules/entities/resource.entity';
     OrganizationModule,
     PermissionModule,
     ResourceModule,
+    JwtAuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
