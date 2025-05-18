@@ -12,14 +12,6 @@ export class CreateOrganizationDto {
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ description: 'The facility code of the organization', example: '501' })
-  @IsString()
-  @IsNotEmpty()
-  facilityCode: string;
-
-  @IsString()
-  @IsNotEmpty()
-  type: string;
 
   @ApiProperty({ description: 'The physical address of the organization', example: '2201 S Stemmons Fwy, Dallas, TX 75216' })
   @IsString()

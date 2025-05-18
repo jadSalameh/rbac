@@ -14,6 +14,7 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,7 +22,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from 'src/shared/decorators/roles.decorator';
 import { Role } from 'src/auth/auth/role.enum';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
-import { AuthGuard } from 'src/shared/guards/auth.guard';
+import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Users')
 @Controller('users')
@@ -33,24 +36,31 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Roles(Role.OWNER, Role.ADMIN)
   @UseGuards(RolesGuard)
+  @Roles(Role.OWNER, Role.ADMIN)
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a user by ID' })
+  @ApiOperation({ summary: "Update a user's role" })
   @ApiParam({ name: 'id', description: 'User ID' })
-  @ApiBody({ type: UpdateUserDto })
+  @ApiBody({ type: UpdateUserRoleDto })
   @ApiResponse({
     status: 200,
     description: 'The user has been successfully updated.',
   })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  editRole(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updateRole(id, updateUserDto.role!);
+  editRole(
+    @Param('id') id: string,
+    @Body() updateUserRoleDto: UpdateUserRoleDto,
+  ) {
+    console.log('#####################################');
+    console.log(JSON.stringify(updateUserRoleDto));
+    return this.userService.updateRole(id, updateUserRoleDto.role!);
   }
 
-  @Roles(Role.OWNER)
   @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
+  @Roles(Role.OWNER)
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a user by ID (Admin or owner only)' })
   @ApiParam({ name: 'id', description: 'User ID' })
