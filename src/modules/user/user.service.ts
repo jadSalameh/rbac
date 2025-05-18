@@ -29,15 +29,25 @@ export class UserService {
     return this.usersRepository.save(user);
   }
 
-  async remove(id: string): Promise<void> {
-    const result = await this.usersRepository.delete(id);
-    if (result.affected === 0) {
+  async remove(id: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['organization'],
+    });
+
+    if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+
+    await this.usersRepository.delete(id);
+    return user;
   }
 
   async updateRole(id: string, role: Role): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['organization'],
+    });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);

@@ -39,7 +39,7 @@ export class UserController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(Role.OWNER, Role.ADMIN)
+  @Roles(Role.OWNER)
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @Patch(':id')
@@ -59,7 +59,16 @@ export class UserController {
     if (req.user.id == id) {
       throw new ForbiddenException('you cannot change your own role');
     }
-    return this.userService.updateRole(id, updateUserRoleDto.role!);
+    return this.userService
+      .updateRole(id, updateUserRoleDto.role!)
+      .then((user) => {
+        if (user.organization.id !== req.user.organization.id) {
+          throw new ForbiddenException(
+            'you can only edit roles of users in your organization',
+          );
+        }
+        return user;
+      });
   }
 
   @UseGuards(RolesGuard)
@@ -77,7 +86,17 @@ export class UserController {
     description: 'Forbidden. User does not have the required role.',
   })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+  remove(@Req() req, @Param('id') id: string) {
+    if (req.user.id == id) {
+      throw new ForbiddenException('you cannot delete yourself');
+    }
+    return this.userService.remove(id).then((user) => {
+      if (user.organization.id !== req.user.organization.id) {
+        throw new ForbiddenException(
+          'you can only delete users from your organization',
+        );
+      }
+      return user;
+    });
   }
 }
