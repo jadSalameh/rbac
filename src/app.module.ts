@@ -11,10 +11,19 @@ import { User } from './modules/entities/user.entity';
 import { Organization } from './modules/entities/organization.entity';
 import { Permission } from './modules/entities/permission.entity';
 import { Resource } from './modules/entities/resource.entity';
+import { AuthModule } from './auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: process.env.JWT_EXPIRE },
+    }),
+    AuthModule,
+    UserModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -29,6 +38,7 @@ import { Resource } from './modules/entities/resource.entity';
     OrganizationModule,
     PermissionModule,
     ResourceModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
