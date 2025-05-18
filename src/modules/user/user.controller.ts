@@ -20,7 +20,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from 'src/shared/decorators/roles.decorator';
 import { Role } from 'src/auth/auth/role.enum';
-import { RolesGuard } from 'src/shared/guards/roles/roles.guard';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -32,13 +33,8 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({ status: 200, description: 'Returns an array of users.' })
-  findAll() {
-    return this.userService.findAll();
-  }
-
+  @Roles(Role.OWNER, Role.ADMIN)
+  @UseGuards(RolesGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user by ID' })
   @ApiParam({ name: 'id', description: 'User ID' })
@@ -48,14 +44,15 @@ export class UserController {
     description: 'The user has been successfully updated.',
   })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  editRole(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.updateRole(id, updateUserDto.role!);
   }
 
   @Roles(Role.OWNER)
   @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a user by ID (Admin only)' })
+  @ApiOperation({ summary: 'Delete a user by ID (Admin or owner only)' })
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({
     status: 200,
