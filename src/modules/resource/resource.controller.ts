@@ -18,7 +18,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { Role } from 'src/auth/auth/role.enum';
+import { Role } from 'src/shared/enum/role.enum';
 import { Roles } from 'src/shared/decorators/roles.decorator';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { OrganizationAccessGuard } from 'src/shared/guards/organizationAccess.guard';
