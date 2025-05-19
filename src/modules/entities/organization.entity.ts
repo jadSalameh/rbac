@@ -21,20 +21,6 @@ export class Organization {
   description: string;
 
   @Column()
-  facilityCode: string;
-
-  @Column({
-    type: 'enum',
-    enum: [
-      'VA_MEDICAL_CENTER',
-      'VA_OUTPATIENT_CLINIC',
-      'VA_COMMUNITY_CARE',
-      'VA_REGIONAL_OFFICE',
-    ],
-  })
-  type: string;
-
-  @Column()
   address: string;
 
   @Column()

@@ -1,12 +1,13 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Patch,
   Param,
   Delete,
   UseGuards,
+  Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,13 +15,15 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from 'src/shared/decorators/roles.decorator';
 import { Role } from 'src/auth/auth/role.enum';
-import { RolesGuard } from 'src/shared/guards/roles/roles.guard';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Users')
 @Controller('users')
@@ -32,30 +35,46 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({ status: 200, description: 'Returns an array of users.' })
-  findAll() {
-    return this.userService.findAll();
-  }
-
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.OWNER)
+  @ApiBearerAuth()
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a user by ID' })
+  @ApiOperation({ summary: "Update a user's role" })
   @ApiParam({ name: 'id', description: 'User ID' })
-  @ApiBody({ type: UpdateUserDto })
+  @ApiBody({ type: UpdateUserRoleDto })
   @ApiResponse({
     status: 200,
     description: 'The user has been successfully updated.',
   })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  @ApiResponse({
+    status: 403,
+    description:
+      'Forbidden - User does not belong to the same organization or cannot change their own role.',
+  })
+  async editRole(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() updateUserRoleDto: UpdateUserRoleDto,
+  ) {
+    if (req.user.id === id) {
+      throw new ForbiddenException('you cannot change your own role');
+    }
+
+    const userOrganizationId = req.user.organization.id;
+
+    return this.userService.updateRole(
+      id,
+      updateUserRoleDto.role!,
+      userOrganizationId,
+    );
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.OWNER)
-  @UseGuards(RolesGuard)
+  @ApiBearerAuth()
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a user by ID (Admin only)' })
+  @ApiOperation({ summary: 'Delete a user by ID (Admin or owner only)' })
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({
     status: 200,
@@ -63,10 +82,17 @@ export class UserController {
   })
   @ApiResponse({
     status: 403,
-    description: 'Forbidden. User does not have the required role.',
+    description:
+      'Forbidden - User does not belong to the same organization or cannot delete themselves.',
   })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+  async remove(@Req() req: any, @Param('id') id: string) {
+    if (req.user.id === id) {
+      throw new ForbiddenException('you cannot delete yourself');
+    }
+
+    const userOrganizationId = req.user.organization.id;
+
+    return this.userService.remove(id, userOrganizationId);
   }
 }

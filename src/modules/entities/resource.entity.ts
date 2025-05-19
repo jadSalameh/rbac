@@ -1,24 +1,18 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Organization } from './organization.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Resource {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('jsonb')
-  data: Record<string, any>;
-
-  @Column({ nullable: true })
-  providerId: string;
+  @Column()
+  data: string;
 
   @ManyToOne(() => Organization)
   organization: Organization;
+
+  @ManyToOne(() => User)
+  user: User;
 }
