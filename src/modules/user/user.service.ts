@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -46,31 +50,47 @@ export class UserService {
     return this.usersRepository.save(user);
   }
 
-  async remove(id: string): Promise<User> {
-    const user = await this.usersRepository.findOne({
+  async remove(id: string, userOrganizationId: string): Promise<User> {
+    const userToRemove = await this.usersRepository.findOne({
       where: { id },
       relations: ['organization'],
     });
 
-    if (!user) {
+    if (!userToRemove) {
       throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    if (userToRemove.organization.id !== userOrganizationId) {
+      throw new ForbiddenException(
+        'You can only delete users from your own organization',
+      );
     }
 
     await this.usersRepository.delete(id);
-    return user;
+    return userToRemove;
   }
 
-  async updateRole(id: string, role: Role): Promise<User> {
-    const user = await this.usersRepository.findOne({
+  async updateRole(
+    id: string,
+    role: Role,
+    userOrganizationId: string,
+  ): Promise<User> {
+    const userToUpdate = await this.usersRepository.findOne({
       where: { id },
       relations: ['organization'],
     });
 
-    if (!user) {
+    if (!userToUpdate) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    user.role = role;
-    return this.usersRepository.save(user);
+    if (userToUpdate.organization.id !== userOrganizationId) {
+      throw new ForbiddenException(
+        'You can only edit roles of users in your own organization',
+      );
+    }
+
+    userToUpdate.role = role;
+    return this.usersRepository.save(userToUpdate);
   }
 }
