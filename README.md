@@ -150,8 +150,6 @@ The system implements role-based access control through several key components:
 
 ## Future Considerations
 
-### Complex Scenarios
-
 1. **Organizations**
 
    - Add cross-organization resource sharing
