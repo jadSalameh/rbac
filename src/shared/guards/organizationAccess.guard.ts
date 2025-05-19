@@ -15,7 +15,8 @@ export class OrganizationAccessGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    const requestedOrganizationId = request.params.organizationId;
+    const requestedOrganizationId =
+      request.params.organizationId || request.body.organizationId;
     const userOrganizationId = user?.organization?.id;
 
     if (!requestedOrganizationId) {
