@@ -4,12 +4,14 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from '../entities/user.entity';
 import { Role } from 'src/auth/auth/role.enum';
+import { OrganizationService } from '../organization/organization.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private organizationService: OrganizationService,
   ) {}
 
   findAll(): Promise<User[]> {
@@ -17,15 +19,30 @@ export class UserService {
   }
 
   async findOne(email: string): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersRepository.findOne({
+      where: { email },
+      relations: ['organization'],
+    });
     if (!user) {
       throw new NotFoundException(`User with Email ${email} not found`);
     }
     return user;
   }
 
-  create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.usersRepository.create(createUserDto);
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const organization = await this.organizationService.findOne(
+      createUserDto.organizationId,
+    );
+
+    const user = this.usersRepository.create({
+      firstName: createUserDto.firstName,
+      lastName: createUserDto.lastName,
+      email: createUserDto.email,
+      password: createUserDto.password,
+      role: createUserDto.role,
+      organization: organization,
+    });
+
     return this.usersRepository.save(user);
   }
 

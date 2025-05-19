@@ -62,6 +62,8 @@ export class UserController {
     return this.userService
       .updateRole(id, updateUserRoleDto.role!)
       .then((user) => {
+        console.log('####################');
+        console.log(JSON.stringify(req.user));
         if (user.organization.id !== req.user.organization.id) {
           throw new ForbiddenException(
             'you can only edit roles of users in your organization',
