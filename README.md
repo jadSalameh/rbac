@@ -19,7 +19,7 @@ This RBAC system provides a secure and scalable way to manage user permissions w
 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/jadSalameh/rbac.git
 cd rbac-challenge
 ```
 
