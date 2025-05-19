@@ -123,6 +123,25 @@ http://localhost:3000/api
 - `organization`: Organization (Many-to-One relationship)
 - `user`: User (Many-to-One relationship)
 
+## guards
+
+1. **AuthGuard**
+
+   - Handles JWT token validation
+   - Extracts and verifies the Bearer token from request headers
+   - Attaches the decoded user payload to the request object
+   - Throws UnauthorizedException for invalid or missing tokens
+
+2. **RolesGuard**
+
+   - Checks if the user's role matches the required roles for the endpoint
+   - Verifies if the user's role has the required permission
+
+3. **OrganizationAccessGuard**
+   - Ensures users can only access resources within their organization or child organization
+   - Validates organization hierarchy
+   - Prevents cross-organization access
+
 ## Access Control Implementation
 
 The system implements role-based access control through several key components:
@@ -158,6 +177,7 @@ The system implements role-based access control through several key components:
 2. **Dynamic Role and permission Management**
 
    - custom permission for each organization so an Admin in one org may have more or less permissions from another org
+   - add a super admin role that would be incharge of onboarding orgs and owners
    - Custom role creation
    - Temporary role assignments
 
